@@ -39,14 +39,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: downcase REPO
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
       - name: Build and push container image
         id: push-step
         uses: docker/build-push-action@master
         with:
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${GITHUB_REPOSITORY}:latest
 
       - name: Sign the container image
         env:
           COSIGN_EXPERIMENTAL: "true"
-        run: cosign sign ghcr.io/${{ github.repository }}@${{ steps.push-step.outputs.digest }}
+        run: cosign sign ghcr.io/${GITHUB_REPOSITORY}@${{ steps.push-step.outputs.digest }}
